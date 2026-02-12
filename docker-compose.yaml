@@ -12,7 +12,7 @@
       - traefik.enable=true
       - traefik.http.routers.tools.rule=Host(`tools.coasterpedia.net`)
       - traefik.http.routers.tools.entrypoints=web,websecure
-      - traefik.http.services.tools.loadbalancer.server.port=80
+      - traefik.http.services.tools.loadbalancer.server.port=8080
 networks:
   coasterpedia_web:
     external: true
