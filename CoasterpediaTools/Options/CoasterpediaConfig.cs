@@ -2,5 +2,5 @@ namespace CoasterpediaTools.Options;
 
 public record CoasterpediaConfig
 {
-    public string BaseUrl { get; init; }
-};
+    public required string BaseUrl { get; init; }
+}
