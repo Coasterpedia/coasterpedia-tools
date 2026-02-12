@@ -18,7 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+var coasterpediaConfig = builder.Configuration.GetRequiredSection(nameof(CoasterpediaConfig)).Get<CoasterpediaConfig>();
 var oauthConfig = builder.Configuration.GetRequiredSection(nameof(OAuthConfig)).Get<OAuthConfig>();
+builder.Services.AddOptions<CoasterpediaConfig>();
 builder.Services.AddOptions<OAuthConfig>();
 
 builder.Services.AddAuthentication(options =>
@@ -41,6 +43,9 @@ builder.Services.AddAuthentication(options =>
     {
         options.ClientId = oauthConfig.ClientId;
         options.ClientSecret = oauthConfig.ClientSecret;
+        // options.AuthorizationEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/authorize";
+        options.TokenEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/access_token";
+        options.UserInformationEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/resource/profile";
         // options.SaveTokens = true;
     });
 
@@ -67,7 +72,7 @@ builder.Services.AddRefitClient<IRefreshTokenClient>(new RefitSettings
     })
     .ConfigureHttpClient(c =>
     {
-        c.BaseAddress = new Uri("https://coasterpedia.net/w/rest.php");
+        c.BaseAddress = new Uri(coasterpediaConfig.BaseUrl + "/w/rest.php");
         c.DefaultRequestHeaders.UserAgent.ParseAdd("CoasterpediaTools/1.0");
         c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
             Convert.ToBase64String(Encoding.UTF8.GetBytes($"{oauthConfig.ClientId}:{oauthConfig.ClientSecret}")));
