@@ -10,7 +10,6 @@
 
     <ItemGroup>
       <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.3.9" />
       <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.3.0" />
       <PackageReference Include="MudBlazor" Version="8.15.0" />
       <PackageReference Include="Pomelo.Extensions.Caching.MySql" Version="2.2.1" />
