@@ -92,7 +92,8 @@ builder.Services.AddHybridCache();
 
 builder.Services.AddScoped<BearerTokenHandler>();
 builder.Services.AddScoped<TokenHandler>();
-builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCircuitServicesAccessor();
 
 builder.Services.AddHttpClient<CoasterpediaClient>(config =>
     {
