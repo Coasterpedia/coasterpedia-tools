@@ -1,0 +1,18 @@
+﻿services:
+  coasterpediatools:
+    image: ghcr.io/coasterpedia/coasterpedia-tools/tools@${API_IMAGE}
+    restart: always
+    networks:
+      - coasterpedia_web
+    environment:
+#      ConnectionStrings__DefaultConnection: Server=${MYSQL_SERVER};database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};Charset=utf8;
+      OAuthConfig__ClientId: ${OAUTH_CLIENT_ID}
+      OAuthConfig__ClientSecret: ${OAUTH_CLIENT_SECRET}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tools.rule=Host(`tools.coasterpedia.net`)
+      - traefik.http.routers.tools.entrypoints=web,websecure
+      - traefik.http.services.tools.loadbalancer.server.port=80
+networks:
+  coasterpedia_web:
+    external: true

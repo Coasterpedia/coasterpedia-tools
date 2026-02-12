@@ -1,0 +1,194 @@
+@typeparam T
+
+@if (MultiSelection)
+{
+    <MudChipSet T="T">
+        @foreach (var val in SelectedValues)
+        {
+            if (!Readonly && !Disabled)
+            {
+                <MudChip T="T" Value="val.Value" Color="val.Color ?? Color.Default" @key="val" Text="@(val.Text ?? val.Value.ToString())" OnClose="@(chip => RemoveChip(chip))" />
+            }
+            else
+            {
+                <MudChip T="T" @key="val" Color="val.Color ?? Color.Default" @key="val" Text="@val?.ToString()" />
+            }
+        }
+    </MudChipSet>
+}
+
+<MudAutocomplete @ref="_autocomplete"
+                 Key="_autocompleteKey"
+                 T="T"
+                 CoerceValue="false"
+                 Clearable="@(!MultiSelection)"
+                 Disabled="@Disabled"
+                 Immediate="true"
+                 Label="@Label"
+                 OnClearButtonClick="HandleClear"
+                 Placeholder="@Placeholder"
+                 ReadOnly="@Readonly"
+                 SearchFunc="SearchItems"
+                 ShowProgressIndicator="true"
+                 Value="_autocompleteValue"
+                 ValueChanged="HandleValueChanged"
+                 Variant="Variant"
+                 Margin="Margin.Normal"
+                 @attributes="AdditionalAttributes" />
+
+@code {
+    #region Parameters
+    /// <summary>
+    /// The label of the input field.
+    /// </summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>
+    /// Whether the autocomplete allows multiple selections.
+    /// </summary>
+    [Parameter] public bool MultiSelection { get; set; } = true;
+
+    /// <summary>
+    /// The variant of the input field.
+    /// </summary>
+    [Parameter] public Variant Variant { get; set; } = Variant.Text;
+
+    /// <summary>
+    /// The value of the input field. Should only be used when <see cref="MultiSelection"/> is false.
+    /// </summary>
+    [Parameter] public T? Value { get; set; }
+
+    /// <summary>
+    /// The selected values. Should only be used when <see cref="MultiSelection"/> is true.
+    /// </summary>
+    private List<MultiSelectChip<T>> _selectedValuesInternal = [];
+
+    [Parameter]
+    public IEnumerable<MultiSelectChip<T>> SelectedValues
+    {
+        get => _selectedValuesInternal;
+        set
+        {
+            var newList = value?.ToList() ?? [];
+            if (!_selectedValuesInternal.SequenceEqual(newList))
+            {
+                _selectedValuesInternal = newList;
+                StateHasChanged();
+            }
+        }
+    }
+    /// <summary>
+    /// The event that is fired when the value changes. Should only be used when <see cref="MultiSelection"/> is false.
+    /// </summary>
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+    /// <summary>
+    /// The event that is fired when the selected values change. Should only be used when <see cref="MultiSelection"/> is true.
+    /// </summary>
+    [Parameter] public EventCallback<IEnumerable<T?>> SelectedValuesChanged { get; set; }
+
+    /// <summary>
+    /// The preloaded items to display in the autocomplete dropdown. Items will be concatenated with the results from the <see cref="SearchFunc"/> function.
+    /// </summary>
+    [Parameter] public IEnumerable<T> PreloadedItems { get; set; } = [];
+
+    /// <summary>
+    /// The function that searches for items based on the specified search text.
+    /// </summary>
+    [Parameter] public Func<string, CancellationToken, Task<IEnumerable<T>>>? SearchFunc { get; set; }
+
+    [Parameter] public bool Readonly { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>
+    /// The text displayed in the input.
+    /// </summary>
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalAttributes { get; set; } = new();
+    #endregion
+
+    #region Fields
+    private MudAutocomplete<T>? _autocomplete;
+    private T? _autocompleteValue;
+    #endregion
+
+    #region Event Handlers
+    /// <summary>
+    /// Handles the MudAutocomplete input clear button click event.
+    /// </summary>
+    private void HandleClear()
+    {
+        if (MultiSelection)
+        {
+            SelectedValues = [];
+            SelectedValuesChanged.InvokeAsync(SelectedValues.Select(x => x.Value));
+        }
+        else
+        {
+            _autocompleteValue = default;
+            ValueChanged.InvokeAsync(_autocompleteValue);
+        }
+
+        _autocomplete?.CloseMenuAsync();
+        _autocomplete?.BlurAsync();
+    }
+
+    /// <summary>
+    /// Handles the MudAutocomplete value changed event.
+    /// </summary>
+    private async Task HandleValueChanged(T value)
+    {
+        if (MultiSelection)
+        {
+            if (value != null && !SelectedValues.Select(x => x.Value).Contains(value))
+            {
+                var newValues = new List<T>(SelectedValues.Select(x => x.Value)) { value };
+                await SelectedValuesChanged.InvokeAsync(newValues);
+            }
+            // Try to blur and refocus to force input reset
+            await _autocomplete.ClearAsync();
+            await _autocomplete.BlurAsync();
+            StateHasChanged();
+            await _autocomplete.FocusAsync();
+        }
+        else
+        {
+            _autocompleteValue = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    /// <summary>
+    /// Removes the specified chip.
+    /// </summary>
+    private async Task RemoveChip(MudChip<T> chip)
+    {
+        _selectedValuesInternal = _selectedValuesInternal
+            .Where(x => !EqualityComparer<T>.Default.Equals(x.Value, chip.Value))
+            .ToList();
+        await SelectedValuesChanged.InvokeAsync(_selectedValuesInternal.Select(x => x.Value));
+        StateHasChanged();
+    }
+    #endregion
+
+    #region Helper Methods
+    /// <summary>
+    /// Searches for items based on the specified search text.
+    /// </summary>
+    private async Task<IEnumerable<T>> SearchItems(string searchText, CancellationToken cancellationToken)
+    {
+        var results = string.IsNullOrEmpty(searchText)
+            ? PreloadedItems.Except(SelectedValues.Select(x => x.Value))
+            : PreloadedItems.Where(item => (item?.ToString() ?? string.Empty).Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+        if (SearchFunc != null)
+        {
+            var externalResults = await SearchFunc(searchText, cancellationToken);
+            results = results.Concat(externalResults).Distinct();
+        }
+
+        return results.Except(SelectedValues.Select(x => x.Value));
+    }
+    #endregion
+}

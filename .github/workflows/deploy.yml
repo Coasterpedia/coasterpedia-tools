@@ -1,0 +1,99 @@
+name: Docker
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  push:
+    branches: [ "main" ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  dotnet_build:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      IMAGE_NAME: Coasterpedia/coasterpedia-tools/tools
+
+    outputs:
+      digest: ${{steps.build-and-push.outputs.digest}}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: CoasterpediaTools/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ github.ref_name }}-tools
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-tools
+          platforms: linux/arm64
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [ dotnet_build ]
+    permissions:
+      contents: read
+
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.DOCKER_SSH_KNOWN_HOSTS }}
+
+      - name: Deploy to server
+        run: >
+          ssh ${{ secrets.DOCKER_HOST }} '
+            export API_IMAGE="${{needs.dotnet_build.outputs.digest}}" &&
+#            export MYSQL_DATABASE="${{secrets.MYSQL_DATABASE}}" &&
+#            export MYSQL_PASSWORD="${{secrets.MYSQL_PASSWORD}}" &&
+#            export MYSQL_SERVER="${{secrets.MYSQL_SERVER}}" &&
+#            export MYSQL_USER="${{secrets.MYSQL_USER}}" &&
+            export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
+            export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
+            if cd coasterpedia-tools; then git pull; else git clone --depth 1 -b main https://github.com/${{ github.repository }} coasterpedia-tools; fi &&
+            docker compose pull &&
+            docker compose up -d -V &&
+            docker system prune -f &&
+            docker volume prune -f
+          '

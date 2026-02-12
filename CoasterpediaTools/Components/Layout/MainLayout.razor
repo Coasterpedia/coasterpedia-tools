@@ -1,0 +1,137 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="_mudThemeProvider" Theme="Theme.ApplicationTheme()" @bind-IsDarkMode="_isDarkMode"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+
+    <MudDrawer id="nav-drawer" Elevation="1" Variant="@DrawerVariant.Mini" Open="false" ClipMode="DrawerClipMode.Docked" Breakpoint="Breakpoint.None"
+               Class="d-none d-md-flex">
+        <MudText Align="Align.Center" Class="mt-3">
+            <MudLink Href="https://coasterpedia.net">
+                <MudImage Src="./Cp_pride.png" Width="32"/>
+            </MudLink>
+        </MudText>
+        <MudNavMenu Margin="Margin.Normal">
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Apps" ActiveClass="">Home</MudNavLink>
+        </MudNavMenu>
+        <MudSpacer/>
+        <MudNavMenu Margin="Margin.Normal" Class="mb-1">
+            <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight" PopoverClass="pa-2" Modal="false">
+                <ActivatorContent>
+                    <MudNavLink Icon="@Icons.Material.Filled.Person" ActiveClass="">Profile</MudNavLink>
+                </ActivatorContent>
+                <ChildContent>
+                    <AuthorizeView>
+                        <Authorized>
+                            <MudText Class="mud-menu-item" Typo="Typo.h5">@context.User.Identity.Name</MudText>
+                        </Authorized>
+                        <NotAuthorized>
+                            <MudText Class="mud-menu-item" Typo="Typo.h5">Not logged in</MudText>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <MudText Class="mud-menu-item pb-0" Typo="Typo.subtitle1">Color</MudText>
+                    <MudToggleGroup T="string" Value="_screenMode" ValueChanged="DarkModeToggle" Style="width: 15rem" Class="ma-3" Color="Color.Default">
+                        <MudToggleItem Value="@("Auto")"/>
+                        <MudToggleItem Value="@("Light")"/>
+                        <MudToggleItem Value="@("Dark")"/>
+                    </MudToggleGroup>
+                    <AuthorizeView>
+                        <Authorized>
+                            <MudMenuItem Href="account/logout" Icon="@Icons.Material.TwoTone.Logout" Label="Log out"/>
+                        </Authorized>
+                        <NotAuthorized>
+                            <MudMenuItem Href="account/login" Icon="@Icons.Material.TwoTone.Login" Label="Log in"/>
+                        </NotAuthorized>
+                    </AuthorizeView>
+
+                </ChildContent>
+            </MudMenu>
+        </MudNavMenu>
+
+    </MudDrawer>
+    <MudMainContent Class="ml-0 ml-md-14 pt-md-8">
+        @Body
+    </MudMainContent>
+    <MudAppBar Elevation="1" Bottom="true" Fixed="true" Class="d-sm-flex d-md-none">
+        <MudText Align="Align.Center">
+            <MudLink Href="https://coasterpedia.net">
+                <MudImage Src="./Cp_pride.png" Width="32" Class="mt-2"/>
+            </MudLink>
+        </MudText>
+
+        <MudIconButton Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Apps">Home</MudIconButton>
+        <MudSpacer/>
+        <MudMenu AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight">
+            <ActivatorContent>
+                <MudIconButton Icon="@Icons.Material.Filled.Person">Profile</MudIconButton>
+            </ActivatorContent>
+            <ChildContent>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudText Class="mud-menu-item" Typo="Typo.h6">@context.User.Identity.Name</MudText>
+                        <MudMenuItem Href="account/logout" Icon="@Icons.Material.TwoTone.Logout" Label="Log out"/>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudText Class="mud-menu-item" Typo="Typo.h6">Welcome</MudText>
+                        <MudMenuItem Href="account/login" Icon="@Icons.Material.TwoTone.Login" Label="Log in"/>
+                    </NotAuthorized>
+                </AuthorizeView>
+
+            </ChildContent>
+        </MudMenu>
+    </MudAppBar>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private string _screenMode = "Auto";
+    private bool _isDarkMode = true;
+    private bool _systemDarkMode = true;
+    private MudThemeProvider _mudThemeProvider;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _mudThemeProvider.WatchSystemDarkModeAsync(OnSystemDarkModeChanged);
+            StateHasChanged();
+        }
+    }
+
+    private Task OnSystemDarkModeChanged(bool newValue)
+    {
+        _systemDarkMode = newValue;
+        if (_screenMode == "Auto")
+        {
+            _isDarkMode = newValue;
+            StateHasChanged();
+        }
+        else
+        {
+            DarkModeToggle(_screenMode);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void DarkModeToggle(string value)
+    {
+        _screenMode = value;
+        _isDarkMode = value switch
+        {
+            "Auto" => _systemDarkMode,
+            "Light" => false,
+            "Dark" => true,
+            _ => _isDarkMode
+        };
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,72 @@
+using Microsoft.AspNetCore.Authentication;
+
+namespace CoasterpediaTools.Authentication.Scheme;
+
+// Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+// See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers
+// for more information concerning the license and the contributors participating to this project.
+
+/// <summary>
+/// Extension methods to add Mediawiki authentication capabilities to an HTTP application pipeline.
+/// </summary>
+public static class MediawikiAuthenticationExtensions
+{
+    /// <summary>
+    /// Adds <see cref="MediawikiAuthenticationHandler"/> to the specified
+    /// <see cref="AuthenticationBuilder"/>, which enables Mediawiki authentication capabilities.
+    /// </summary>
+    /// <param name="builder">The authentication builder.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public static AuthenticationBuilder AddMediawiki(this AuthenticationBuilder builder)
+    {
+        return builder.AddMediawiki(MediawikiAuthenticationDefaults.AuthenticationScheme, options => { });
+    }
+
+    /// <summary>
+    /// Adds <see cref="MediawikiAuthenticationHandler"/> to the specified
+    /// <see cref="AuthenticationBuilder"/>, which enables Mediawiki authentication capabilities.
+    /// </summary>
+    /// <param name="builder">The authentication builder.</param>
+    /// <param name="configuration">The delegate used to configure the OpenID 2.0 options.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public static AuthenticationBuilder AddMediawiki(
+        this AuthenticationBuilder builder,
+        Action<MediawikiAuthenticationOptions> configuration)
+    {
+        return builder.AddMediawiki(MediawikiAuthenticationDefaults.AuthenticationScheme, configuration);
+    }
+
+    /// <summary>
+    /// Adds <see cref="MediawikiAuthenticationHandler"/> to the specified
+    /// <see cref="AuthenticationBuilder"/>, which enables Mediawiki authentication capabilities.
+    /// </summary>
+    /// <param name="builder">The authentication builder.</param>
+    /// <param name="scheme">The authentication scheme associated with this instance.</param>
+    /// <param name="configuration">The delegate used to configure the Mediawiki options.</param>
+    /// <returns>The <see cref="AuthenticationBuilder"/>.</returns>
+    public static AuthenticationBuilder AddMediawiki(
+        this AuthenticationBuilder builder,
+        string scheme,
+        Action<MediawikiAuthenticationOptions> configuration)
+    {
+        return builder.AddMediawiki(scheme, MediawikiAuthenticationDefaults.DisplayName, configuration);
+    }
+
+    /// <summary>
+    /// Adds <see cref="MediawikiAuthenticationHandler"/> to the specified
+    /// <see cref="AuthenticationBuilder"/>, which enables Mediawiki authentication capabilities.
+    /// </summary>
+    /// <param name="builder">The authentication builder.</param>
+    /// <param name="scheme">The authentication scheme associated with this instance.</param>
+    /// <param name="caption">The optional display name associated with this instance.</param>
+    /// <param name="configuration">The delegate used to configure the Mediawiki options.</param>
+    /// <returns>The <see cref="AuthenticationBuilder"/>.</returns>
+    public static AuthenticationBuilder AddMediawiki(
+        this AuthenticationBuilder builder,
+        string scheme,
+        string caption,
+        Action<MediawikiAuthenticationOptions> configuration)
+    {
+        return builder.AddOAuth<MediawikiAuthenticationOptions, MediawikiAuthenticationHandler>(scheme, caption, configuration);
+    }
+}

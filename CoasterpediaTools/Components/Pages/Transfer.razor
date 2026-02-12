@@ -1,0 +1,123 @@
+@page "/transfer"
+@using CoasterpediaTools.Components.Shared
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+
+<PageTitle>Transfer Photo</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+
+    <div class="d-flex justify-space-between align-center mb-6">
+        <div>
+            <MudText Typo="Typo.h5" Class="fw-bold">Transfer Photo</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Automatically transfer photos from other websites
+            </MudText>
+        </div>
+        <!-- Action Buttons -->
+        <MudStack Row="true" Spacing="2">
+            @* <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.DateRange"> *@
+            @*     Last 30 Days *@
+            @* </MudButton> *@
+            @* <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.QuestionMark"> *@
+            @*     Help *@
+            @* </MudButton> *@
+        </MudStack>
+    </div>
+
+    <MudPaper Class="pb-8">
+        <MudStepper @ref="_stepper">
+            <ChildContent>
+                <MudStep Title="Upload">
+                    @if (!string.IsNullOrEmpty(_warning))
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
+                    }
+                    <EditForm Model="@_urlFormModel" OnValidSubmit="GetPhotos" FormName="UrlForm">
+                        <DataAnnotationsValidator/>
+                        <MudTextField Class="mb-4"
+                                      @bind-Value="_urlFormModel.Url"
+                                      For="@(() => _urlFormModel.Url)"
+                                      Label="Enter URL"
+                                      Variant="Variant.Outlined"
+                                      Immediate="true"
+                                      Clearable/>
+
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary" Class="flex-end"
+                                   Disabled="@(string.IsNullOrEmpty(_urlFormModel.Url) || _processing)">
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Processing</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Get photos</MudText>
+                            }
+                        </MudButton>
+                    </EditForm>
+                </MudStep>
+
+                <MudStep Title="Describe">
+                    @if (!string.IsNullOrEmpty(_warning))
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
+                    }
+                    <MudStack Row="true">
+                        <MudImage Src="@_thumbnailUrl" Height="200"/>
+                        <MudStack Class="flex-grow-1">
+                            <EditForm Model="@_detailsFormModel" OnValidSubmit="Upload" FormName="DetailsForm">
+                                <DataAnnotationsValidator/>
+                                <MudTextField @bind-Value="_detailsFormModel.Title" Label="Title" Variant="Variant.Outlined"
+                                              For="@(() => _detailsFormModel.Title)"/>
+                                <MudTextField @bind-Value="_detailsFormModel.Description" Label="Description"
+                                              Variant="Variant.Outlined" Lines="5" For="@(() => _detailsFormModel.Description)"/>
+
+                                <MultiSelectAutoComplete T="string"
+                                                         Placeholder="Categories"
+                                                         MultiSelection="true"
+                                                         Variant="Variant.Outlined"
+                                                         SearchFunc="@CategorySearch"
+                                                         SelectedValues="_detailsFormModel.Categories"
+                                                         SelectedValuesChanged="@OnSelectedCategoriesChanged"
+                                />
+                                <MudStack Row="true">
+                                <MudButton OnClick="@Reset"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Error" Style="width: fit-content">Reset</MudButton>
+                        
+                                <MudSpacer/>
+
+                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                                           Disabled="@(_detailsFormModel.Categories.Count == 0 || _detailsFormModel.Title == string.Empty || _detailsFormModel.Description == string.Empty || _processing)"
+                                           Style="width: fit-content">
+                                    @if (_processing)
+                                    {
+                                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                        <MudText Class="ms-2">Processing</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText>Upload</MudText>
+                                    }
+                                </MudButton>
+                                </MudStack>
+                            </EditForm>
+                        </MudStack>
+                    </MudStack>
+                </MudStep>
+                <MudStep Title="Complete">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Style="font-size: 6rem; text-align: center;" Color="Color.Success"/>
+                        <MudText>File uploaded successfully!</MudText>
+                        <MudButton OnClick="@Reset" Color="Color.Primary">Upload more</MudButton>
+                    </MudStack>
+                </MudStep>
+            </ChildContent>
+            <ActionContent Context="_stepper"></ActionContent>
+        </MudStepper>
+    </MudPaper>
+</MudContainer>

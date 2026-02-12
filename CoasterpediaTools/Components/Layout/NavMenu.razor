@@ -1,0 +1,24 @@
+﻿<MudNavMenu Margin="Margin.Normal">
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Apps" ActiveClass="">Home</MudNavLink>
+</MudNavMenu>
+<MudSpacer/>
+<MudNavMenu Margin="Margin.Normal" Class="mb-1">
+    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight">
+        <ActivatorContent>
+            <MudNavLink Icon="@Icons.Material.Filled.Person" ActiveClass="">Profile</MudNavLink>
+        </ActivatorContent>
+        <ChildContent>
+            <AuthorizeView>
+                <Authorized>
+                    <MudText Class="mud-menu-item" Typo="Typo.h6">@context.User.Identity.Name</MudText>
+                    <MudMenuItem Href="account/logout" Icon="@Icons.Material.TwoTone.Logout" Label="Log out"/>
+                </Authorized>
+                <NotAuthorized>
+                    <MudText Class="mud-menu-item" Typo="Typo.h6">Welcome</MudText>
+                    <MudMenuItem Href="account/login" Icon="@Icons.Material.TwoTone.Login" Label="Log in"/>
+                </NotAuthorized>
+            </AuthorizeView>
+            
+        </ChildContent>
+    </MudMenu>
+</MudNavMenu>
