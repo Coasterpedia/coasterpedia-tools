@@ -47,19 +47,6 @@ builder.Services.AddAuthentication(options =>
         // options.AuthorizationEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/authorize";
         options.TokenEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/access_token";
         options.UserInformationEndpoint = coasterpediaConfig.BaseUrl + "/w/rest.php/oauth2/resource/profile";
-        options.Events = new OAuthEvents
-        {
-            OnRedirectToAuthorizationEndpoint = context =>
-            {
-                var uriBuilder = new UriBuilder(context.RedirectUri)
-                {
-                    Scheme = "https",
-                    Port = -1
-                };
-                context.RedirectUri = uriBuilder.ToString();
-                return Task.FromResult(0);
-            }
-        };
         // options.SaveTokens = true;
     });
 
@@ -136,6 +123,14 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.Use(next => context => {
+    if (string.Equals(context.Request.Headers["X-Forwarded-Proto"], "https", StringComparison.OrdinalIgnoreCase)) {
+        context.Request.Scheme = "https";
+    }
+
+    return next(context);
+});
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
