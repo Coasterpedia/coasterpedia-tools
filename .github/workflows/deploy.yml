@@ -83,17 +83,17 @@ jobs:
 
       - name: Deploy to server
         run: >
-          ssh ${{ secrets.DOCKER_HOST }} '
-            export API_IMAGE="${{needs.dotnet_build.outputs.digest}}" &&
-#            export MYSQL_DATABASE="${{secrets.MYSQL_DATABASE}}" &&
-#            export MYSQL_PASSWORD="${{secrets.MYSQL_PASSWORD}}" &&
-#            export MYSQL_SERVER="${{secrets.MYSQL_SERVER}}" &&
-#            export MYSQL_USER="${{secrets.MYSQL_USER}}" &&
-            export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
-            export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
-            if cd coasterpedia-tools; then git pull; else git clone --depth 1 -b main https://github.com/${{ github.repository }} coasterpedia-tools; fi &&
-            docker compose pull &&
-            docker compose up -d -V &&
-            docker system prune -f &&
-            docker volume prune -f
-          '
+               ssh ${{ secrets.DOCKER_HOST }} '
+               export API_IMAGE="${{needs.dotnet_build.outputs.digest}}" &&
+          #            export MYSQL_DATABASE="${{secrets.MYSQL_DATABASE}}" &&
+          #            export MYSQL_PASSWORD="${{secrets.MYSQL_PASSWORD}}" &&
+          #            export MYSQL_SERVER="${{secrets.MYSQL_SERVER}}" &&
+          #            export MYSQL_USER="${{secrets.MYSQL_USER}}" &&
+               export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
+               export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
+               if cd coasterpedia-tools; then git pull; else git clone --depth 1 -b main https://github.com/${{ github.repository }} coasterpedia-tools; fi &&
+               docker compose pull &&
+               docker compose up -d -V &&
+               docker system prune -f &&
+               docker volume prune -f
+               '
