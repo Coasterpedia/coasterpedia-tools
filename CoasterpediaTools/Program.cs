@@ -94,7 +94,10 @@ builder.Services.AddScoped<BearerTokenHandler>();
 builder.Services.AddScoped<TokenHandler>();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddHttpClient<CoasterpediaClient>()
+builder.Services.AddHttpClient<CoasterpediaClient>(config =>
+    {
+        config.BaseAddress = new Uri(coasterpediaConfig.BaseUrl);
+    })
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
     {
         AutomaticDecompression = DecompressionMethods.All
