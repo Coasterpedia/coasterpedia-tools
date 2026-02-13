@@ -13,6 +13,10 @@
       - traefik.http.routers.tools.rule=Host(`tools.coasterpedia.net`)
       - traefik.http.routers.tools.entrypoints=web,websecure
       - traefik.http.services.tools.loadbalancer.server.port=8080
+    volumes:
+      - data_protection_keys:/home/app/.aspnet/DataProtection-Keys
 networks:
   coasterpedia_web:
     external: true
+volumes:
+  data_protection_keys:
