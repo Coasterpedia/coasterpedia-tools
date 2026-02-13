@@ -9,7 +9,6 @@ using CoasterpediaTools.Clients.Wiki;
 using CoasterpediaTools.Components;
 using CoasterpediaTools.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using MudBlazor.Services;
 using Refit;
 
@@ -80,15 +79,15 @@ builder.Services.AddRefitClient<IRefreshTokenClient>(new RefitSettings
     });
 
 builder.Services.AddHybridCache();
-// if (!builder.Environment.IsDevelopment())
-// {
-//     builder.Services.AddDistributedMySqlCache(options =>
-//     {
-//         options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-//         options.SchemaName = "Tools";
-//         options.TableName = "Cache";
-//     });
-// }
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDistributedMySqlCache(options =>
+    {
+        options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        options.SchemaName = "coasterpedia_tools";
+        options.TableName = "Cache";
+    });
+}
 
 builder.Services.AddScoped<BearerTokenHandler>();
 builder.Services.AddScoped<TokenHandler>();

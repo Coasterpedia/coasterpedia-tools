@@ -85,6 +85,7 @@ jobs:
         run: >
                ssh ${{ secrets.DOCKER_HOST }} '
                export API_IMAGE="${{needs.dotnet_build.outputs.digest}}" &&
+               export DEFAULT_CONNECTION_STRING="${{secrets.DEFAULT_CONNECTION_STRING}}" &&
                export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
                export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
                if cd coasterpedia-tools; then git pull; else git clone --depth 1 -b main https://github.com/${{ github.repository }} coasterpedia-tools; fi &&

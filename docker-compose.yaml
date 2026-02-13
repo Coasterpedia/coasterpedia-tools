@@ -5,7 +5,7 @@
     networks:
       - coasterpedia_web
     environment:
-#      ConnectionStrings__DefaultConnection: Server=${MYSQL_SERVER};database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};Charset=utf8;
+      ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION_STRING}
       OAuthConfig__ClientId: ${OAUTH_CLIENT_ID}
       OAuthConfig__ClientSecret: ${OAUTH_CLIENT_SECRET}
     labels:
