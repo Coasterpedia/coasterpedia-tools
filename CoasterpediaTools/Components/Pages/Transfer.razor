@@ -66,8 +66,8 @@
                     {
                         <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
                     }
-                    <MudStack Row="true">
-                        <MudImage Src="@_thumbnailUrl" Height="200"/>
+                    <MudStack Row="true" Breakpoint="Breakpoint.SmAndDown">
+                        <MudImage Src="@_thumbnailUrl" Height="200" ObjectFit="ObjectFit.Contain" />
                         <MudStack Class="flex-grow-1">
                             <EditForm Model="@_detailsFormModel" OnValidSubmit="Upload" FormName="DetailsForm">
                                 <DataAnnotationsValidator/>
