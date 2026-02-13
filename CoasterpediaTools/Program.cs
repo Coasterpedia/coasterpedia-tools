@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using AspNetCore.DataProtection.MySql;
 using CoasterpediaTools.Authentication;
 using CoasterpediaTools.Authentication.Handler;
 using CoasterpediaTools.Authentication.Scheme;
@@ -10,6 +11,7 @@ using CoasterpediaTools.Components;
 using CoasterpediaTools.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MudBlazor.Services;
+using MySqlConnector;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +89,8 @@ if (!builder.Environment.IsDevelopment())
         options.SchemaName = "coasterpedia_tools";
         options.TableName = "Cache";
     });
+    builder.Services.AddTransient(_ => new MySqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddDataProtection().PersistKeysToMySql();
 }
 
 builder.Services.AddScoped<BearerTokenHandler>();
