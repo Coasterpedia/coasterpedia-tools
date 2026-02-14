@@ -126,7 +126,11 @@ public partial class Transfer
         if (_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata.ContainsKey("GPSLatitude"))
         {
             comment +=
-                $$$"""{{Location|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLatitude"].Value}}}|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLongitude"].Value}}}|}}""";
+                $$$"""
+                   {{Location|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLatitude"].Value}}}|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLongitude"].Value}}}|}}
+                   
+                   
+                   """;
         }
 
         comment += $$$"""
