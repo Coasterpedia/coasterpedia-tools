@@ -3,6 +3,7 @@ using CoasterpediaTools.Clients.Wiki;
 using CoasterpediaTools.Components.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using WikiClientLibrary;
 using WikiClientLibrary.Files;
 using WikiClientLibrary.Pages;
 using WikiClientLibrary.Pages.Queries;
@@ -76,12 +77,21 @@ public partial class Transfer
         _thumbnailUrl = _fileInfo.GetPropertyGroup<PageImagesPropertyGroup>().ThumbnailImage.Url;
 
         var coasterpediaSite = await WikiSite.GetCoasterpedia();
-        _uploadResult = await coasterpediaSite.UploadAsync(_fileInfo.Title,
-            new ExternalFileStashSource(_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.Url), "", false);
-
-        if (_uploadResult.Warnings.Count > 0)
+        try
         {
-            _warning = _uploadResult.Warnings.ToString();
+            _uploadResult = await coasterpediaSite.UploadAsync(_fileInfo.Title,
+                new ExternalFileStashSource(_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.Url), "", false);
+
+            if (_uploadResult.Warnings.Count > 0)
+            {
+                _warning = _uploadResult.Warnings.ToString();
+                _processing = false;
+                return;
+            }
+        }
+        catch (OperationFailedException ex)
+        {
+            _warning = ex.ErrorMessage;
             _processing = false;
             return;
         }
