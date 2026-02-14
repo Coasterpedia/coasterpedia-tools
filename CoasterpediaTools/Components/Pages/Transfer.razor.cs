@@ -215,10 +215,18 @@ public partial class Transfer
             comment += $"[[Category:{category.Value}]]\n";
         }
 
-        var result = await coasterpediaSite.UploadAsync(uploadTitle + _extension, new FileKeyUploadSource(_uploadResult.FileKey), comment, false);
-        if (result.Warnings.Count > 0)
+        try
         {
-            _warning = result.Warnings.ToString();
+            var result = await coasterpediaSite.UploadAsync(uploadTitle + _extension, new FileKeyUploadSource(_uploadResult.FileKey), comment, false);
+            if (result.Warnings.Count > 0)
+            {
+                _warning = result.Warnings.ToString();
+                _processing = false;
+                return;
+            }
+        } catch (OperationFailedException ex)
+        {
+            _warning = ex.ErrorMessage;
             _processing = false;
             return;
         }
@@ -239,7 +247,10 @@ public partial class Transfer
             return [];
         }
 
-        return new[] { value }.Concat(result.Select(x => x.Title[9..]).Where(x => x != value));
+        return new[] { value } // Add current input to top of category list
+            .Concat(result
+                .Select(x => x.Title[9..]) // Remove Category: from beginning of result
+                .Where(x => x != value)); // Remove current value if in the returned list to prevent same item appearing twice
     }
 
     private async Task OnSelectedCategoriesChanged(IEnumerable<string> values)
