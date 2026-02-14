@@ -177,7 +177,7 @@ public partial class Transfer
         _warning = string.Empty;
         var coasterpediaSite = await WikiSite.GetCoasterpedia();
         var newExtension = Path.GetExtension(_detailsFormModel.Title).ToLower();
-        var uploadTitle = _detailsFormModel.Title[..^newExtension.Length];
+        var uploadTitle = _detailsFormModel.Title[..^newExtension.Length].Trim();
         var comment = $$$"""
                          =={{int:filedesc}}==
                          {{Information
