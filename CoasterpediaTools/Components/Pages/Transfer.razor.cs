@@ -60,16 +60,37 @@ public partial class Transfer
             return;
         }
 
-        if (uri.Host == "commons.wikimedia.org" && uri.AbsolutePath.StartsWith("/wiki/File:"))
+        if (uri.Host == "commons.wikimedia.org")
         {
+            if (!uri.AbsolutePath.StartsWith("/wiki/File:"))
+            {
+                _warning = "Unrecognised Wikimedia Commons URL, please enter file page (commons.wikimedia.org/File:Example)";
+                _processing = false;
+                return;
+            }
+
             await ProcessCommonsImage(uri);
             _processing = false;
             return;
         }
 
-        if (uri.Host == "www.geograph.org.uk" && uri.AbsolutePath.StartsWith("/photo/"))
+        if (uri.Host == "www.geograph.org.uk")
         {
+            if (!uri.AbsolutePath.StartsWith("/photo/"))
+            {
+                _warning = "Unrecognised Geograph URL, please enter photo page (www.geograph.org.uk/photo/123)";
+                _processing = false;
+                return;
+            }
+
             await ProcessGeographImage(uri);
+            _processing = false;
+            return;
+        }
+
+        if (uri.Host == "upload.wikimedia.org" || uri.Host.Contains("wikipedia.org"))
+        {
+            _warning = "Invalid URL, please link to Wikimedia Commons file URL (commons.wikimedia.org/File:Example)";
             _processing = false;
             return;
         }
@@ -88,15 +109,15 @@ public partial class Transfer
             _warning = page.Error;
             return;
         }
-        
+
         _extension = Path.GetExtension(page.Image);
-        
+
         var result = await UploadFile(page.Title + _extension, page.Imgserver + page.Image);
         if (!result)
         {
             return;
         }
-        
+
         _thumbnailUrl = page.Imgserver + page.Image;
         _detailsFormModel.Title = page.Title!;
         _detailsFormModel.Date = page.Taken;
@@ -136,7 +157,7 @@ public partial class Transfer
         {
             return;
         }
-        
+
         _extension = Path.GetExtension(filename);
         _detailsFormModel.Title = filename[..^_extension.Length].Replace('_', ' ');
         _detailsFormModel.Date = fileInfo.ExtMetadata["DateTime"].Value.ToString();
@@ -224,7 +245,8 @@ public partial class Transfer
                 _processing = false;
                 return;
             }
-        } catch (OperationFailedException ex)
+        }
+        catch (OperationFailedException ex)
         {
             _warning = ex.ErrorMessage;
             _processing = false;

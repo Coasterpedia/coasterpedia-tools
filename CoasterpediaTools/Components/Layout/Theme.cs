@@ -14,11 +14,11 @@ public static class Theme
                 PrimaryContrastText = "#ffffff",
                 PrimaryDarken = "#518812",
                 PrimaryLighten = "#68a133",
-                Secondary = "#64748b", // Neutral gray, clean and professional
+                Secondary = "#64748b",
                 SecondaryContrastText = "#ffffff",
                 SecondaryLighten = "#475569",
                 SecondaryDarken = "#94a3b8",
-                Success = "#10b981", // Fresh green, success
+                Success = "#10b981", // Green
                 Info = "#0ea5e9", // Info blue, clear
                 Tertiary = "#8b5cf6", // Purple 500
                 TertiaryContrastText = "#ffffff",
@@ -35,34 +35,34 @@ public static class Theme
                 ErrorDarken = "#b91c1c",
                 ErrorLighten = "#ef4444",
 
-                Black = "#020617", // Deep blue-black, more texture
+                Black = "#020617", // Deep blue-black
                 White = "#ffffff",
-                AppbarBackground = "#ffffff", // Very light blue-gray, modern
+                AppbarBackground = "#ffffff", // Very light blue-gray
                 AppbarText = "#0a0a0a",
-                Background = "#f8fafc", // Very light blue-gray, modern
+                Background = "#f8fafc", // Very light blue-gray
                 Surface = "#ffffff",
                 DrawerBackground = "#ffffff",
-                TextPrimary = "#0f172a", // Deep blue-gray, modern professional
-                TextSecondary = "#64748b", // Neutral gray, hierarchy
+                TextPrimary = "#0f172a", // Deep blue-gray
+                TextSecondary = "#64748b", // Neutral gray
 
                 TextDisabled = "#94a3b8", // Soft gray
                 ActionDefault = "#262626",
                 ActionDisabled = "rgba(100, 116, 139, 0.4)",
                 ActionDisabledBackground = "rgba(100, 116, 139, 0.1)",
-                Divider = "#e2e8f0", // Elegant divider
+                Divider = "#e2e8f0",
                 DividerLight = "#f1f5f9",
-                TableLines = "#e2e8f0", // Table lines, elegant
+                TableLines = "#e2e8f0", // Table lines
                 LinesDefault = "#e2e8f0",
                 LinesInputs = "#cbd5e1",
             },
             PaletteDark = new PaletteDark
             {
-                Primary = "#60AE26", // shadcn/ui white primary
+                Primary = "#60AE26",
                 PrimaryContrastText = "#020817",
                 PrimaryDarken = "#68a133",
                 PrimaryLighten = "#ffffff",
                 Secondary = "#78716c", // Neutral gray
-                Success = "#22c55e", // Green for success
+                Success = "#22c55e", // Green
                 Info = "#0ea5e9", // Sky blue for info (shadcn sky-500)
                 InfoDarken = "#0284c7", // Darker sky blue (shadcn sky-600)
                 InfoLighten = "#38bdf8", // Lighter sky blue (shadcn sky-400)
@@ -84,19 +84,19 @@ public static class Theme
 
                 Black = "#020817",
                 White = "#fafafa",
-                Background = "#0c0a09", // shadcn/ui dark background
+                Background = "#0c0a09",
                 Surface = "#171717", // Deeper surface color
                 AppbarBackground = "#0c0a09",
                 AppbarText = "#fafafa",
                 DrawerText = "#fafafa",
                 DrawerBackground = "#0c0a09",
-                TextPrimary = "#fafafa", // shadcn/ui white text
+                TextPrimary = "#fafafa",
                 TextSecondary = "#a1a1aa", // Neutral gray secondary text
                 TextDisabled = "rgba(161, 161, 170, 0.5)",
                 ActionDefault = "#e5e5e5",
                 ActionDisabled = "rgba(161, 161, 170, 0.3)",
                 ActionDisabledBackground = "rgba(161, 161, 170, 0.1)",
-                Divider = "rgba(255, 255, 255, 0.1)", // shadcn/ui divider color
+                Divider = "rgba(255, 255, 255, 0.1)",
                 DividerLight = "rgba(161, 161, 170, 0.1)",
                 TableLines = "rgba(255, 255, 255, 0.1)",
                 LinesDefault = "rgba(255, 255, 255, 0.1)",
@@ -108,9 +108,8 @@ public static class Theme
             },
             LayoutProperties = new LayoutProperties
             {
-                AppbarHeight = "64px", // More modern height
+                AppbarHeight = "64px",
                 DefaultBorderRadius = "8px",
-                DrawerWidthLeft = "280px", // Wider sidebar
                 DrawerMiniWidthRight = "260px"
             },
             Shadows = new Shadow
