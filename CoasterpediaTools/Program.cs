@@ -6,6 +6,7 @@ using AspNetCore.DataProtection.MySql;
 using CoasterpediaTools.Authentication;
 using CoasterpediaTools.Authentication.Handler;
 using CoasterpediaTools.Authentication.Scheme;
+using CoasterpediaTools.Clients.Geograph;
 using CoasterpediaTools.Clients.Wiki;
 using CoasterpediaTools.Components;
 using CoasterpediaTools.Options;
@@ -79,6 +80,18 @@ builder.Services.AddRefitClient<IRefreshTokenClient>(new RefitSettings
         c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
             Convert.ToBase64String(Encoding.UTF8.GetBytes($"{oauthConfig.ClientId}:{oauthConfig.ClientSecret}")));
     });
+
+builder.Services.AddRefitClient<IGeographClient>(new RefitSettings
+{
+    ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    })
+}).ConfigureHttpClient(c =>
+{
+    c.BaseAddress = new Uri("https://api.geograph.org.uk");
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("CoasterpediaTools/1.0 (https://coasterpedia.net)");
+});
 
 builder.Services.AddHybridCache();
 if (!builder.Environment.IsDevelopment())

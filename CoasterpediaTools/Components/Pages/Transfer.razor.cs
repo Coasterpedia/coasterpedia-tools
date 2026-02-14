@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CoasterpediaTools.Clients.Geograph;
 using CoasterpediaTools.Clients.Wiki;
 using CoasterpediaTools.Components.Shared;
 using Microsoft.AspNetCore.Components;
@@ -15,12 +16,12 @@ namespace CoasterpediaTools.Components.Pages;
 public partial class Transfer
 {
     [Inject] WikiSiteAccessor WikiSite { get; init; }
+    [Inject] IGeographClient GeographClient { get; init; }
 
     private UrlForm _urlFormModel = new();
     private DetailsForm _detailsFormModel = new();
     private MudStepper _stepper = new();
     private bool _processing;
-    private WikiPage _fileInfo;
     private string _thumbnailUrl;
     private string _warning = string.Empty;
     private UploadResult _uploadResult;
@@ -38,23 +39,79 @@ public partial class Transfer
         [Required] public string Description { get; set; }
 
         [Required] public List<MultiSelectChip<string>> Categories { get; set; } = [];
+        public string Date { get; set; }
+        public string Source { get; set; }
+        public string Author { get; set; }
+        public string License { get; set; }
+        public string? AdditionalLicense { get; set; }
+        public string? Latitude { get; set; }
+        public string? Longitude { get; set; }
     }
 
     private async Task GetPhotos()
     {
         _processing = true;
         _warning = string.Empty;
-        var commonsSite = await WikiSite.GetCommons();
         if (!Uri.IsWellFormedUriString(_urlFormModel.Url, UriKind.Absolute) ||
-            !Uri.TryCreate(_urlFormModel.Url, UriKind.Absolute, out var uri) ||
-            uri.Host != "commons.wikimedia.org" ||
-            !uri.AbsolutePath.StartsWith("/wiki/File:"))
+            !Uri.TryCreate(_urlFormModel.Url, UriKind.Absolute, out var uri))
         {
             _warning = "Invalid URL.";
             _processing = false;
             return;
         }
 
+        if (uri.Host == "commons.wikimedia.org" && uri.AbsolutePath.StartsWith("/wiki/File:"))
+        {
+            await ProcessCommonsImage(uri);
+            _processing = false;
+            return;
+        }
+
+        if (uri.Host == "www.geograph.org.uk" && uri.AbsolutePath.StartsWith("/photo/"))
+        {
+            await ProcessGeographImage(uri);
+            _processing = false;
+            return;
+        }
+
+        _warning = "Unrecognised website";
+        _processing = false;
+    }
+
+    private async Task ProcessGeographImage(Uri uri)
+    {
+        var filename = uri.AbsolutePath[7..];
+        var page = await GeographClient.GetPhotoAsync(filename);
+
+        if (page.Error != null)
+        {
+            _warning = page.Error;
+            return;
+        }
+        
+        _extension = Path.GetExtension(page.Image);
+        
+        var result = await UploadFile(page.Title + _extension, page.Imgserver + page.Image);
+        if (!result)
+        {
+            return;
+        }
+        
+        _thumbnailUrl = page.Imgserver + page.Image;
+        _detailsFormModel.Title = page.Title!;
+        _detailsFormModel.Date = page.Taken;
+        _detailsFormModel.Source = "https://www.geograph.org.uk/photo/" + filename;
+        _detailsFormModel.Author = page.Realname;
+        _detailsFormModel.Latitude = page.Wgs84Lat;
+        _detailsFormModel.Longitude = page.Wgs84Long;
+        _detailsFormModel.License = "cc-by-sa-2.0";
+        _detailsFormModel.AdditionalLicense = $$$"""{{Geograph|{{{_detailsFormModel.Source}}}}}""";
+        await _stepper.NextStepAsync();
+    }
+
+    private async Task ProcessCommonsImage(Uri uri)
+    {
+        var commonsSite = await WikiSite.GetCommons();
         var filename = uri.AbsolutePath[11..];
 
         var page = new WikiPage(commonsSite, $"File:{filename}");
@@ -69,38 +126,49 @@ public partial class Transfer
         if (!page.Exists || page.GetPropertyGroup<FileInfoPropertyGroup>() == null || page.GetPropertyGroup<PageImagesPropertyGroup>() == null)
         {
             _warning = "File not found.";
-            _processing = false;
             return;
         }
 
-        _fileInfo = page;
-        _thumbnailUrl = _fileInfo.GetPropertyGroup<PageImagesPropertyGroup>().ThumbnailImage.Url;
+        _thumbnailUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().ThumbnailImage.Url;
+        var fileInfo = page.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision;
+        var result = await UploadFile(page.Title, fileInfo.Url);
+        if (!result)
+        {
+            return;
+        }
+        
+        _extension = Path.GetExtension(filename);
+        _detailsFormModel.Title = filename[..^_extension.Length].Replace('_', ' ');
+        _detailsFormModel.Date = fileInfo.ExtMetadata["DateTime"].Value.ToString();
+        _detailsFormModel.Source = fileInfo.DescriptionUrl;
+        _detailsFormModel.Author = fileInfo.UserName;
+        _detailsFormModel.Latitude = fileInfo.ExtMetadata["GPSLatitude"].Value.ToString();
+        _detailsFormModel.Longitude = fileInfo.ExtMetadata["GPSLongitude"].Value.ToString();
+        _detailsFormModel.License = fileInfo.ExtMetadata["License"].Value.ToString();
+        _detailsFormModel.AdditionalLicense = $$$"""{{Wikimedia Commons|{{{fileInfo.DescriptionUrl}}}}}""";
+        await _stepper.NextStepAsync();
+    }
 
+    private async Task<bool> UploadFile(string title, string url)
+    {
         var coasterpediaSite = await WikiSite.GetCoasterpedia();
         try
         {
-            _uploadResult = await coasterpediaSite.UploadAsync(_fileInfo.Title,
-                new ExternalFileStashSource(_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.Url), "", false);
+            _uploadResult = await coasterpediaSite.UploadAsync(title, new ExternalFileStashSource(url), "", false);
 
             if (_uploadResult.Warnings.Count > 0)
             {
                 _warning = _uploadResult.Warnings.ToString();
-                _processing = false;
-                return;
+                return false;
             }
         }
         catch (OperationFailedException ex)
         {
             _warning = ex.ErrorMessage;
-            _processing = false;
-            return;
+            return false;
         }
 
-        _extension = Path.GetExtension(filename);
-        _detailsFormModel.Title = filename[..^_extension.Length].Replace('_', ' ');
-
-        _processing = false;
-        await _stepper.NextStepAsync();
+        return true;
     }
 
     private async Task Upload()
@@ -114,31 +182,33 @@ public partial class Transfer
                          =={{int:filedesc}}==
                          {{Information
                          |description={{{_detailsFormModel.Description}}}
-                         |date={{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["DateTime"].Value}}}
-                         |source={{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.DescriptionUrl}}}
-                         |author={{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.UserName}}}
+                         |date={{{_detailsFormModel.Date}}}
+                         |source={{{_detailsFormModel.Source}}}
+                         |author={{{_detailsFormModel.Author}}}
                          |permission=
                          |other versions=
                          }}
 
                          """;
 
-        if (_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata.ContainsKey("GPSLatitude"))
+        if (_detailsFormModel is { Latitude: not null, Longitude: not null })
         {
-            comment +=
-                $$$"""
-                   {{Location|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLatitude"].Value}}}|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["GPSLongitude"].Value}}}|}}
-                   
-                   
-                   """;
+            comment += $$$"""
+                          {{Location|{{{_detailsFormModel.Latitude}}}|{{{_detailsFormModel.Longitude}}}|}}
+
+                          """;
         }
 
         comment += $$$"""
                       =={{int:license-header}}==
-                      {{{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.ExtMetadata["License"].Value}}}}}
-                      {{Wikimedia Commons|{{{_fileInfo.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision.DescriptionUrl}}}}}
+                      {{{{{_detailsFormModel.License}}}}}
 
                       """;
+
+        if (_detailsFormModel.AdditionalLicense is not null)
+        {
+            comment += _detailsFormModel.AdditionalLicense + "\n";
+        }
 
         foreach (var category in _detailsFormModel.Categories)
         {
@@ -203,7 +273,6 @@ public partial class Transfer
         _urlFormModel = new UrlForm();
         _detailsFormModel = new DetailsForm();
         _processing = false;
-        _fileInfo = null;
         _thumbnailUrl = string.Empty;
         _warning = string.Empty;
         _uploadResult = null;
