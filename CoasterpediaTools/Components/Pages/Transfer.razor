@@ -44,6 +44,16 @@
                                       Immediate="true"
                                       Clearable/>
 
+                        <MudList T="string" Class="mb-4" ReadOnly="true" Dense="true">
+                            <MudListSubheader>Supported websites</MudListSubheader>
+                            <MudListItem Icon="@Icons.Material.Rounded.KeyboardArrowRight">
+                                Wikimedia Commons (<MudLink Href="https://commons.wikimedia.org/">commons.wikimedia.org</MudLink>)
+                            </MudListItem>
+                            <MudListItem Icon="@Icons.Material.Rounded.KeyboardArrowRight">
+                                Geograph (<MudLink Href="https://www.geograph.org.uk/">www.geograph.org.uk</MudLink>)
+                            </MudListItem>
+                        </MudList>
+
                         <MudButton ButtonType="ButtonType.Submit"
                                    Variant="Variant.Filled"
                                    Color="Color.Primary" Class="flex-end"
@@ -67,7 +77,7 @@
                         <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
                     }
                     <MudStack Row="true" Breakpoint="Breakpoint.SmAndDown">
-                        <MudImage Src="@_thumbnailUrl" Height="200" ObjectFit="ObjectFit.Contain" />
+                        <MudImage Src="@_thumbnailUrl" Height="200" ObjectFit="ObjectFit.Contain"/>
                         <MudStack Class="flex-grow-1">
                             <EditForm Model="@_detailsFormModel" OnValidSubmit="Upload" FormName="DetailsForm">
                                 <DataAnnotationsValidator/>
@@ -85,25 +95,26 @@
                                                          SelectedValuesChanged="@OnSelectedCategoriesChanged"
                                 />
                                 <MudStack Row="true">
-                                <MudButton OnClick="@Reset"
-                                           Variant="Variant.Filled"
-                                           Color="Color.Error" Style="width: fit-content">Reset</MudButton>
-                        
-                                <MudSpacer/>
+                                    <MudButton OnClick="@Reset"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Error" Style="width: fit-content">Reset
+                                    </MudButton>
 
-                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                                           Disabled="@(_detailsFormModel.Categories.Count == 0 || _detailsFormModel.Title == string.Empty || _detailsFormModel.Description == string.Empty || _processing)"
-                                           Style="width: fit-content">
-                                    @if (_processing)
-                                    {
-                                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
-                                        <MudText Class="ms-2">Processing</MudText>
-                                    }
-                                    else
-                                    {
-                                        <MudText>Upload</MudText>
-                                    }
-                                </MudButton>
+                                    <MudSpacer/>
+
+                                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                                               Disabled="@(_detailsFormModel.Categories.Count == 0 || _detailsFormModel.Title == string.Empty || _detailsFormModel.Description == string.Empty || _processing)"
+                                               Style="width: fit-content">
+                                        @if (_processing)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                            <MudText Class="ms-2">Processing</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Upload</MudText>
+                                        }
+                                    </MudButton>
                                 </MudStack>
                             </EditForm>
                         </MudStack>
