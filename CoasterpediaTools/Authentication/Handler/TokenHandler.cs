@@ -58,7 +58,7 @@ public class TokenHandler
 
             return new TokenResult(true, result);
         }
-        catch (ApiException e) when (e.StatusCode is HttpStatusCode.Unauthorized)
+        catch (ApiException e) when (e.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.NotFound)
         {
             await RemoveToken(sub, cancellationToken);
             return new TokenResult(false);
