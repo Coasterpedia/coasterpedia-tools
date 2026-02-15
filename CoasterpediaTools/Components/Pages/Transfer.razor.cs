@@ -133,7 +133,7 @@ public partial class Transfer
     private async Task ProcessCommonsImage(Uri uri)
     {
         var commonsSite = await WikiSite.GetCommons();
-        var filename = uri.AbsolutePath[11..];
+        var filename = Uri.UnescapeDataString(uri.AbsolutePath[11..]);
 
         var page = new WikiPage(commonsSite, $"File:{filename}");
         await page.RefreshAsync(new WikiPageQueryProvider
@@ -163,8 +163,12 @@ public partial class Transfer
         _detailsFormModel.Date = fileInfo.ExtMetadata["DateTime"].Value.ToString();
         _detailsFormModel.Source = fileInfo.DescriptionUrl;
         _detailsFormModel.Author = fileInfo.UserName;
-        _detailsFormModel.Latitude = fileInfo.ExtMetadata["GPSLatitude"].Value.ToString();
-        _detailsFormModel.Longitude = fileInfo.ExtMetadata["GPSLongitude"].Value.ToString();
+        if (fileInfo.ExtMetadata.TryGetValue("GPSLatitude", out var latitude) && fileInfo.ExtMetadata.TryGetValue("GPSLongitude", out var longitude))
+        {
+            _detailsFormModel.Latitude = latitude.Value?.ToString();
+            _detailsFormModel.Longitude = longitude.Value?.ToString();
+        }
+
         _detailsFormModel.License = fileInfo.ExtMetadata["License"].Value.ToString();
         _detailsFormModel.AdditionalLicense = $$$"""{{Wikimedia Commons|{{{fileInfo.DescriptionUrl}}}}}""";
         await _stepper.NextStepAsync();
