@@ -4,7 +4,6 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
-
 <PageTitle>@App.SetPageTitle("Transfer Photo")</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -134,11 +133,12 @@
                         </MudStack>
 
                         <MudStack Class="flex-grow-1">
+                            <MudText>To use this file in an infobox, copy this text into the image field:</MudText>
+                            <CopyField Text="@_fileName"/>
+
                             <MudText>To use the file in an article, copy this text into a page:</MudText>
                             <CopyField Text="@_wikitext"/>
 
-                            <MudText>To link to it in HTML, copy this URL:</MudText>
-                            <CopyField Text="@_url"/>
                             <MudButton OnClick="@Reset" Color="Color.Primary" Variant="Variant.Filled" Style="width: fit-content">Upload more</MudButton>
                         </MudStack>
                     </MudStack>
