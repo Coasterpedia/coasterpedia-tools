@@ -1,0 +1,18 @@
+<MudStack Row="true">
+    <MudTextField Value="@Text" Variant="Variant.Outlined" ReadOnly="true"/>
+    <button type="button" class="mud-button-root mud-button mud-button-outlined mud-button-outlined-primary mud-button-outlined-size-medium mud-ripple"
+            onclick="navigator.clipboard.writeText('@(Text)')">
+        <span class="mud-button-label">
+            <span class="mud-button-icon-start mud-button-icon-size-medium">
+                <svg class="mud-icon-root mud-svg-icon mud-icon-size-medium" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="img">
+                    <path d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                </svg>
+            </span>Copy
+        </span>
+    </button>
+</MudStack>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+}

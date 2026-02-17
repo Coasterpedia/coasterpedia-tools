@@ -26,6 +26,9 @@ public partial class Transfer
     private string _warning = string.Empty;
     private UploadResult _uploadResult;
     private string _extension = string.Empty;
+    private string? _fileName;
+    private string? _url;
+    private string? _wikitext;
 
     private class UrlForm
     {
@@ -110,9 +113,7 @@ public partial class Transfer
             return;
         }
 
-        _extension = Path.GetExtension(page.Image);
-
-        var result = await UploadFile(page.Title + _extension, page.Imgserver + page.Image);
+        var result = await UploadFile(Path.GetFileName(page.Image), page.Imgserver + page.Image);
         if (!result)
         {
             return;
@@ -158,7 +159,6 @@ public partial class Transfer
             return;
         }
 
-        _extension = Path.GetExtension(filename);
         _detailsFormModel.Title = filename[..^_extension.Length].Replace('_', ' ');
         _detailsFormModel.Date = fileInfo.ExtMetadata["DateTime"].Value.ToString();
         _detailsFormModel.Source = fileInfo.DescriptionUrl;
@@ -193,6 +193,7 @@ public partial class Transfer
             return false;
         }
 
+        _extension = Path.GetExtension(title).ToLower();
         return true;
     }
 
@@ -201,8 +202,18 @@ public partial class Transfer
         _processing = true;
         _warning = string.Empty;
         var coasterpediaSite = await WikiSite.GetCoasterpedia();
-        var newExtension = Path.GetExtension(_detailsFormModel.Title).ToLower();
-        var uploadTitle = _detailsFormModel.Title[..^newExtension.Length].Trim();
+
+        _fileName = _detailsFormModel.Title;
+        var newExtension = Path.GetExtension(_fileName);
+        if (newExtension != string.Empty)
+        {
+            _fileName = _fileName[..^newExtension.Length];
+        }
+
+        _fileName = _fileName.Trim() + _extension;
+        _url = "https://coasterpedia.net/wiki/File:" + _fileName.Replace(' ', '_');
+        _wikitext = $"[[File:{_fileName}|thumb]]";
+
         var comment = $$$"""
                          =={{int:filedesc}}==
                          {{Information
@@ -242,7 +253,7 @@ public partial class Transfer
 
         try
         {
-            var result = await coasterpediaSite.UploadAsync(uploadTitle + _extension, new FileKeyUploadSource(_uploadResult.FileKey), comment, false);
+            var result = await coasterpediaSite.UploadAsync(_fileName, new FileKeyUploadSource(_uploadResult.FileKey), comment, false);
             if (result.Warnings.Count > 0)
             {
                 _warning = result.Warnings.ToString();
@@ -314,6 +325,8 @@ public partial class Transfer
         _warning = string.Empty;
         _uploadResult = null;
         _extension = string.Empty;
+        _url = string.Empty;
+        _wikitext = string.Empty;
         await _stepper.ResetAsync();
     }
 }

@@ -120,11 +120,27 @@
                         </MudStack>
                     </MudStack>
                 </MudStep>
+
                 <MudStep Title="Complete">
                     <MudStack AlignItems="AlignItems.Center">
                         <MudIcon Icon="@Icons.Material.Filled.Check" Style="font-size: 6rem; text-align: center;" Color="Color.Success"/>
                         <MudText>File uploaded successfully!</MudText>
-                        <MudButton OnClick="@Reset" Color="Color.Primary">Upload more</MudButton>
+                    </MudStack>
+
+                    <MudStack Row="true" Breakpoint="Breakpoint.SmAndDown" Class="mt-8">
+                        <MudStack AlignItems="AlignItems.Center">
+                            <MudImage Src="@_thumbnailUrl" Height="200" ObjectFit="ObjectFit.Contain"/>
+                            <MudLink Href="@_url" Target="_blank">@(_fileName)</MudLink>
+                        </MudStack>
+
+                        <MudStack Class="flex-grow-1">
+                            <MudText>To use the file in an article, copy this text into a page:</MudText>
+                            <CopyField Text="@_wikitext"/>
+
+                            <MudText>To link to it in HTML, copy this URL:</MudText>
+                            <CopyField Text="@_url"/>
+                            <MudButton OnClick="@Reset" Color="Color.Primary" Variant="Variant.Filled" Style="width: fit-content">Upload more</MudButton>
+                        </MudStack>
                     </MudStack>
                 </MudStep>
             </ChildContent>
