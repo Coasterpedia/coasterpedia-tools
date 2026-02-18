@@ -42,7 +42,7 @@ public partial class Transfer
         [Required] public string Description { get; set; }
 
         [Required] public List<MultiSelectChip<string>> Categories { get; set; } = [];
-        public string Date { get; set; }
+        public string? Date { get; set; }
         public string Source { get; set; }
         public string Author { get; set; }
         public string License { get; set; }
@@ -160,7 +160,7 @@ public partial class Transfer
         }
 
         _detailsFormModel.Title = filename[..^_extension.Length].Replace('_', ' ');
-        _detailsFormModel.Date = fileInfo.ExtMetadata["DateTime"].Value.ToString();
+        _detailsFormModel.Date = fileInfo.ExtMetadata["DateTimeOriginal"].Value?.ToString();
         _detailsFormModel.Source = fileInfo.DescriptionUrl;
         _detailsFormModel.Author = fileInfo.UserName;
         if (fileInfo.ExtMetadata.TryGetValue("GPSLatitude", out var latitude) && fileInfo.ExtMetadata.TryGetValue("GPSLongitude", out var longitude))
