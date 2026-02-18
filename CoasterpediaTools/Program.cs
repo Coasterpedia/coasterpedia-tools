@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using AspNetCore.DataProtection.MySql;
+using BitzArt.Blazor.Cookies;
 using CoasterpediaTools.Authentication;
 using CoasterpediaTools.Authentication.Handler;
 using CoasterpediaTools.Authentication.Scheme;
@@ -134,6 +135,8 @@ builder.Services.AddSingleton<WikiSiteAccessor>();
 builder.Services.AddTransient<CookieEvents>();
 
 builder.Services.AddControllers();
+
+builder.AddBlazorCookies();
 
 var app = builder.Build();
 

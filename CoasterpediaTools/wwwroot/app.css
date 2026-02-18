@@ -5,3 +5,9 @@
 .transfer-button {
     background-color: #296395;
 }
+
+.mud-popover {
+    background-color: color-mix(in srgb, var(--mud-palette-surface) 80%, transparent) !important;
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid color-mix(in srgb, var(--mud-palette-text-primary) 10%, transparent);
+}

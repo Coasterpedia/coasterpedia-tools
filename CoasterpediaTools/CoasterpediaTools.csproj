@@ -10,6 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="AspNetCore.DataProtection.MySql" Version="1.2.0" />
+      <PackageReference Include="BitzArt.Blazor.Cookies.Server" Version="1.5.1" />
       <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.8.0" />
       <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.3.0" />
       <PackageReference Include="MudBlazor" Version="8.15.0" />

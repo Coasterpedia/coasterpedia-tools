@@ -1,0 +1,22 @@
+<AuthorizeView>
+    <Authorized>
+        <MudText Class="mud-menu-item" Typo="Typo.h5">@context.User.Identity.Name</MudText>
+    </Authorized>
+    <NotAuthorized>
+        <MudText Class="mud-menu-item" Typo="Typo.h5">Not logged in</MudText>
+    </NotAuthorized>
+</AuthorizeView>
+<MudText Class="mud-menu-item pb-0" Color="Color.Secondary">Colour</MudText>
+<MudToggleGroup T="string" Value="ScreenMode" ValueChanged="OnScreenModeChanged" Style="width: 15rem" Class="ma-3" Color="Color.Secondary">
+    <MudToggleItem Value="@("Auto")"/>
+    <MudToggleItem Value="@("Light")"/>
+    <MudToggleItem Value="@("Dark")"/>
+</MudToggleGroup>
+<AuthorizeView>
+    <Authorized>
+        <MudMenuItem Href="account/logout" Icon="@Icons.Material.TwoTone.Logout" Label="Log out"/>
+    </Authorized>
+    <NotAuthorized>
+        <MudMenuItem Href="account/login" Icon="@Icons.Material.TwoTone.Login" Label="Log in"/>
+    </NotAuthorized>
+</AuthorizeView>
