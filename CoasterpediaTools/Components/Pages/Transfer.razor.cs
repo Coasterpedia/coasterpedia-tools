@@ -169,7 +169,15 @@ public partial class Transfer
             _detailsFormModel.Longitude = longitude.Value?.ToString();
         }
 
-        _detailsFormModel.License = fileInfo.ExtMetadata["License"].Value.ToString();
+        if (fileInfo.ExtMetadata.TryGetValue("License", out var license))
+        {
+            _detailsFormModel.License = license.Value?.ToString();
+        }
+        else
+        {
+            _warning = "Unrecognised license";
+            return;
+        }
         _detailsFormModel.AdditionalLicense = $$$"""{{Wikimedia Commons|{{{fileInfo.DescriptionUrl}}}}}""";
         await _stepper.NextStepAsync();
     }
