@@ -29,7 +29,7 @@
         <MudStepper @ref="_stepper">
             <ChildContent>
                 <MudStep Title="Upload">
-                    @if (!string.IsNullOrEmpty(_warning))
+                    @if (!string.IsNullOrEmpty(_warning.Value))
                     {
                         <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
                     }
@@ -71,7 +71,7 @@
                 </MudStep>
 
                 <MudStep Title="Describe">
-                    @if (!string.IsNullOrEmpty(_warning))
+                    @if (!string.IsNullOrEmpty(_warning.Value))
                     {
                         <MudAlert Severity="Severity.Error" Class="mb-4">@_warning</MudAlert>
                     }
