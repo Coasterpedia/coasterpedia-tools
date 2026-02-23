@@ -7,11 +7,11 @@
         {
             if (!Readonly && !Disabled)
             {
-                <MudChip T="T" Value="val.Value" Color="val.Color ?? Color.Default" @key="val" Text="@(val.Text ?? val.Value.ToString())" OnClose="@(chip => RemoveChip(chip))" />
+                <MudChip T="T" Value="val.Value" Color="val.Color ?? Color.Default" Text="@(val.Text ?? val.Value.ToString())" OnClose="@(chip => RemoveChip(chip))" />
             }
             else
             {
-                <MudChip T="T" @key="val" Color="val.Color ?? Color.Default" @key="val" Text="@val?.ToString()" />
+                <MudChip T="T" @key="val" Color="val.Color ?? Color.Default" Text="@val?.ToString()" />
             }
         }
     </MudChipSet>

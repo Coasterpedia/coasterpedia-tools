@@ -22,7 +22,7 @@
         <MudNavMenu Margin="Margin.Normal" Class="mb-1">
             <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.BottomRight" PopoverClass="pa-2" Modal="false">
                 <ActivatorContent>
-                    <MudNavLink Icon="@Icons.Material.Filled.Person" ActiveClass="">Profile</MudNavLink>
+                    <MudNavLink Icon="@Icons.Material.Filled.Person" ActiveClass="" OnClick="@context.ToggleAsync">Profile</MudNavLink>
                 </ActivatorContent>
                 <ChildContent>
                     <ProfileMenu ScreenMode="@_screenMode" ScreenModeChanged="DarkModeToggle" />
@@ -41,11 +41,11 @@
             </MudLink>
         </MudText>
 
-        <MudIconButton Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Apps">Home</MudIconButton>
+        <MudIconButton Href="/" Icon="@Icons.Material.Filled.Apps">Home</MudIconButton>
         <MudSpacer/>
         <MudMenu AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight">
             <ActivatorContent>
-                <MudIconButton Icon="@Icons.Material.Filled.Person">Profile</MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Person" OnClick="@context.ToggleAsync">Profile</MudIconButton>
             </ActivatorContent>
             <ChildContent>
                 <ProfileMenu ScreenMode="@_screenMode" ScreenModeChanged="DarkModeToggle" />
