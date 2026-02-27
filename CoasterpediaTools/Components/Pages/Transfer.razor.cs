@@ -164,20 +164,20 @@ public partial class Transfer
         _detailsFormModel.Author = fileInfo.UserName;
         if (fileInfo.ExtMetadata.TryGetValue("DateTimeOriginal", out var takenDate))
         {
-            _detailsFormModel.Date = takenDate.Value?.ToString();
+            _detailsFormModel.Date = takenDate.Value.ToString();
         }
         else
         {
             if (fileInfo.ExtMetadata.TryGetValue("DateTime", out var uploadedDate))
             {
-                _detailsFormModel.Date = uploadedDate.Value?.ToString();
+                _detailsFormModel.Date = uploadedDate.Value.ToString();
             }
         }
         
         if (fileInfo.ExtMetadata.TryGetValue("GPSLatitude", out var latitude) && fileInfo.ExtMetadata.TryGetValue("GPSLongitude", out var longitude))
         {
-            _detailsFormModel.Latitude = latitude.Value?.ToString();
-            _detailsFormModel.Longitude = longitude.Value?.ToString();
+            _detailsFormModel.Latitude = latitude.Value.ToString();
+            _detailsFormModel.Longitude = longitude.Value.ToString();
         }
 
         if (!fileInfo.ExtMetadata.TryGetValue("License", out var license))
@@ -186,7 +186,7 @@ public partial class Transfer
             return;
         }
 
-        _detailsFormModel.License = license.Value?.ToString();
+        _detailsFormModel.License = license.Value.ToString();
         _detailsFormModel.AdditionalLicense = $$$"""{{Wikimedia Commons|{{{fileInfo.DescriptionUrl}}}}}""";
         await _stepper.NextStepAsync();
     }
@@ -203,7 +203,7 @@ public partial class Transfer
             {
                 var warnings = _uploadResult.Warnings.Select(x => x.Key switch
                 {
-                    "duplicate" => new MarkupString($"File is a duplicate version of <a href=\"https://coasterpedia.net/wiki/File:{HttpUtility.UrlEncode(x.Value.First.ToString())}\" target=\"_blank\" class=\"mud-typography mud-link mud-error-text mud-link-underline-hover mud-typography-body1\">{x.Value.First}</a>"),
+                    "duplicate" => new MarkupString($"File is a duplicate version of <a href=\"https://coasterpedia.net/wiki/File:{HttpUtility.UrlEncode(x.Value[0].ToString())}\" target=\"_blank\" class=\"mud-typography mud-link mud-error-text mud-link-underline-hover mud-typography-body1\">{x.Value[0]}</a>"),
                     _ => new MarkupString(x.ToString())
                 });
                 _warning = new MarkupString(string.Join(Environment.NewLine, warnings));
