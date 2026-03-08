@@ -134,7 +134,7 @@ public partial class Transfer
     private async Task ProcessCommonsImage(Uri uri)
     {
         var commonsSite = await WikiSite.GetCommons();
-        var filename = Uri.UnescapeDataString(uri.AbsolutePath[11..]);
+        var filename = Uri.UnescapeDataString(Uri.UnescapeDataString(uri.AbsolutePath[11..]));
 
         var page = new WikiPage(commonsSite, $"File:{filename}");
         await page.RefreshAsync(new WikiPageQueryProvider
