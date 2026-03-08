@@ -36,6 +36,7 @@
                     <EditForm Model="@_urlFormModel" OnValidSubmit="GetPhotos" FormName="UrlForm">
                         <DataAnnotationsValidator/>
                         <MudTextField Class="mb-4"
+                                      InputType="InputType.Url"
                                       @bind-Value="_urlFormModel.Url"
                                       For="@(() => _urlFormModel.Url)"
                                       Label="Enter URL"
