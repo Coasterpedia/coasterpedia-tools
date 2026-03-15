@@ -18,6 +18,7 @@ public partial class Transfer
 {
     [Inject] WikiSiteAccessor WikiSite { get; init; }
     [Inject] IGeographClient GeographClient { get; init; }
+    [Inject] ILogger<Transfer> Logger { get; init; }
 
     private UrlForm _urlFormModel = new();
     private DetailsForm _detailsFormModel = new();
@@ -297,20 +298,28 @@ public partial class Transfer
 
     private async Task<IEnumerable<string>> CategorySearch(string value, CancellationToken token)
     {
-        // In real life use an asynchronous function for fetching data from an api.
-        var coasterpediaSite = await WikiSite.GetCoasterpedia();
-        var result = await coasterpediaSite.OpenSearchAsync(value, 10, 14, OpenSearchOptions.None, token);
-
-        // if text is null or empty, don't return values (drop-down will not open)
-        if (string.IsNullOrEmpty(value))
+        try
         {
+            var coasterpediaSite = await WikiSite.GetCoasterpedia();
+            var result = await coasterpediaSite.OpenSearchAsync(value, 10, 14, OpenSearchOptions.None, token);
+
+
+            // if text is null or empty, don't return values (drop-down will not open)
+            if (string.IsNullOrEmpty(value))
+            {
+                return [];
+            }
+
+            return new[] { value } // Add current input to top of category list
+                .Concat(result
+                    .Select(x => x.Title[9..]) // Remove Category: from beginning of result
+                    .Where(x => x != value)); // Remove current value if in the returned list to prevent same item appearing twice
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error occurred during search");
             return [];
         }
-
-        return new[] { value } // Add current input to top of category list
-            .Concat(result
-                .Select(x => x.Title[9..]) // Remove Category: from beginning of result
-                .Where(x => x != value)); // Remove current value if in the returned list to prevent same item appearing twice
     }
 
     private async Task OnSelectedCategoriesChanged(IEnumerable<string> values)
