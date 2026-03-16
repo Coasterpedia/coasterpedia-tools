@@ -174,7 +174,7 @@ public partial class Transfer
                 _detailsFormModel.Date = uploadedDate.Value.ToString();
             }
         }
-        
+
         if (fileInfo.ExtMetadata.TryGetValue("GPSLatitude", out var latitude) && fileInfo.ExtMetadata.TryGetValue("GPSLongitude", out var longitude))
         {
             _detailsFormModel.Latitude = latitude.Value.ToString();
@@ -204,7 +204,8 @@ public partial class Transfer
             {
                 var warnings = _uploadResult.Warnings.Select(x => x.Key switch
                 {
-                    "duplicate" => new MarkupString($"File is a duplicate version of <a href=\"https://coasterpedia.net/wiki/File:{HttpUtility.UrlEncode(x.Value[0].ToString())}\" target=\"_blank\" class=\"mud-typography mud-link mud-error-text mud-link-underline-hover mud-typography-body1\">{x.Value[0]}</a>"),
+                    "duplicate" => new MarkupString(
+                        $"File is a duplicate version of <a href=\"https://coasterpedia.net/wiki/File:{HttpUtility.UrlEncode(x.Value[0].ToString())}\" target=\"_blank\" class=\"mud-typography mud-link mud-error-text mud-link-underline-hover mud-typography-body1\">{x.Value[0]}</a>"),
                     _ => new MarkupString(x.ToString())
                 });
                 _warning = new MarkupString(string.Join(Environment.NewLine, warnings));
@@ -217,7 +218,6 @@ public partial class Transfer
             return false;
         }
 
-        
         return true;
     }
 
@@ -298,11 +298,17 @@ public partial class Transfer
 
     private async Task<IEnumerable<string>> CategorySearch(string value, CancellationToken token)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return [];
+        }
+
         try
         {
             var coasterpediaSite = await WikiSite.GetCoasterpedia();
-            var result = await coasterpediaSite.OpenSearchAsync(value, 10, 14, OpenSearchOptions.None, token);
-
+            const int maxCount = 10;
+            const int categoryNamespaceId = 14;
+            var result = await coasterpediaSite.OpenSearchAsync(value.Trim(), maxCount, categoryNamespaceId, OpenSearchOptions.None, token);
 
             // if text is null or empty, don't return values (drop-down will not open)
             if (string.IsNullOrEmpty(value))
