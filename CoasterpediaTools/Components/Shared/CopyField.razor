@@ -1,7 +1,8 @@
+@using System.Text.Json
 <MudStack Row="true">
     <MudTextField Value="@Text" Variant="Variant.Outlined" ReadOnly="true"/>
     <button type="button" class="mud-button-root mud-button mud-button-outlined mud-button-outlined-primary mud-button-outlined-size-medium mud-ripple"
-            onclick="navigator.clipboard.writeText('@(Text)')">
+            onclick="navigator.clipboard.writeText(@(JsonSerializer.Serialize(Text)))">
         <span class="mud-button-label">
             <span class="mud-button-icon-start mud-button-icon-size-medium">
                 <svg class="mud-icon-root mud-svg-icon mud-icon-size-medium" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="img">
