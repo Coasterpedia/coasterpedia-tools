@@ -8,6 +8,7 @@
       ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION_STRING}
       OAuthConfig__ClientId: ${OAUTH_CLIENT_ID}
       OAuthConfig__ClientSecret: ${OAUTH_CLIENT_SECRET}
+      CommonsConfig__AccessToken: ${COMMONS_ACCESS_TOKEN}
     labels:
       - traefik.enable=true
       - traefik.http.routers.tools.rule=Host(`tools.coasterpedia.net`)

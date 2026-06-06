@@ -24,8 +24,10 @@ builder.Services.AddRazorComponents()
 
 var coasterpediaConfig = builder.Configuration.GetRequiredSection(nameof(CoasterpediaConfig)).Get<CoasterpediaConfig>();
 var oauthConfig = builder.Configuration.GetRequiredSection(nameof(OAuthConfig)).Get<OAuthConfig>();
+var commonsConfig = builder.Configuration.GetRequiredSection(nameof(CommonsConfig)).Get<CommonsConfig>();
 builder.Services.AddOptions<CoasterpediaConfig>();
 builder.Services.AddOptions<OAuthConfig>();
+builder.Services.AddOptions<CommonsConfig>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -132,6 +134,8 @@ builder.Services.AddHttpClient<CommonsClient>()
     {
         c.DefaultRequestHeaders.UserAgent.ParseAdd("CoasterpediaTools/1.0 (https://coasterpedia.net)");
         c.DefaultRequestHeaders.Referrer = new Uri("https://coasterpedia.net");
+        c.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", commonsConfig!.AccessToken);
     });
 
 builder.Services.AddSingleton<WikiSiteAccessor>();

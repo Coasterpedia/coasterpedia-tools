@@ -88,6 +88,7 @@ jobs:
                export DEFAULT_CONNECTION_STRING="${{secrets.DEFAULT_CONNECTION_STRING}}" &&
                export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
                export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
+               export COMMONS_ACCESS_TOKEN="${{secrets.COMMONS_ACCESS_TOKEN}}" &&
                if cd coasterpedia-tools; then git pull; else git clone --depth 1 -b main https://github.com/${{ github.repository }} coasterpedia-tools; fi &&
                docker compose pull &&
                docker compose up -d -V &&
