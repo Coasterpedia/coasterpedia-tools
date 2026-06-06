@@ -128,7 +128,11 @@ builder.Services.AddHttpClient<CommonsClient>()
     {
         AutomaticDecompression = DecompressionMethods.All
     })
-    .ConfigureHttpClient(c => { c.DefaultRequestHeaders.UserAgent.ParseAdd("CoasterpediaTools/1.0 (https://coasterpedia.net)"); });
+    .ConfigureHttpClient(c =>
+    {
+        c.DefaultRequestHeaders.UserAgent.ParseAdd("CoasterpediaTools/1.0 (https://coasterpedia.net)");
+        c.DefaultRequestHeaders.Referrer = new Uri("https://coasterpedia.net");
+    });
 
 builder.Services.AddSingleton<WikiSiteAccessor>();
 
