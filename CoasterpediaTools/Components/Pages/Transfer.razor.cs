@@ -143,7 +143,7 @@ public partial class Transfer
             Properties =
             {
                 new FileInfoPropertyProvider { QueryExtMetadata = true },
-                new PageImagesPropertyProvider { ThumbnailSize = 200 }
+                new PageImagesPropertyProvider { ThumbnailSize = 250 }
             }
         });
         if (!page.Exists || page.GetPropertyGroup<FileInfoPropertyGroup>() == null || page.GetPropertyGroup<PageImagesPropertyGroup>() == null)
