@@ -114,7 +114,10 @@ public partial class Transfer
             return;
         }
 
-        var result = await UploadFile(Path.GetFileName(page.Image), page.Imgserver + page.Image);
+        var url = page.Imgserver + page.Image;
+        var result = await UploadFile(Path.GetFileName(page.Image),
+            site => site.UploadAsync(Guid.NewGuid() + _extension, new ExternalFileStashSource(url), "", false));
+
         if (!result)
         {
             return;
@@ -154,7 +157,20 @@ public partial class Transfer
 
         _thumbnailUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().ThumbnailImage.Url;
         var fileInfo = page.GetPropertyGroup<FileInfoPropertyGroup>().LatestRevision;
-        var result = await UploadFile(page.Title, fileInfo.Url);
+        var fileBytes = await WikiSite.DownloadCommonsAsync(fileInfo.Url);
+        var result = await UploadFile(page.Title, async site =>
+        {
+            using var ms = new MemoryStream(fileBytes);
+            var source = new ChunkedUploadSource(site, ms, Guid.NewGuid() + _extension);
+            UploadResult uploadResult;
+            do
+            {
+                uploadResult = await source.StashNextChunkAsync();
+            } while (!source.IsStashed);
+
+            return uploadResult;
+        });
+
         if (!result)
         {
             return;
@@ -192,13 +208,13 @@ public partial class Transfer
         await _stepper.NextStepAsync();
     }
 
-    private async Task<bool> UploadFile(string title, string url)
+    private async Task<bool> UploadFile(string title, Func<WikiSite, Task<UploadResult>> doStash)
     {
         var coasterpediaSite = await WikiSite.GetCoasterpedia();
         try
         {
             _extension = Path.GetExtension(title).ToLower();
-            _uploadResult = await coasterpediaSite.UploadAsync(Guid.NewGuid() + _extension, new ExternalFileStashSource(url), "", false);
+            _uploadResult = await doStash(coasterpediaSite);
 
             if (_uploadResult.Warnings.Count > 0)
             {

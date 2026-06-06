@@ -10,4 +10,6 @@ public class CommonsClient
     }
 
     public WikiClient GetSite() => new(_client);
+
+    public HttpClient HttpClient => _client;
 }

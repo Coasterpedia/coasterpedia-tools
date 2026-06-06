@@ -30,6 +30,9 @@ public class WikiSiteAccessor
         return _coasterpediaSite;
     }
     
+    public Task<byte[]> DownloadCommonsAsync(string url, CancellationToken cancellationToken = default)
+        => _commonsClient.HttpClient.GetByteArrayAsync(url, cancellationToken);
+
     public async Task<WikiSite> GetCommons()
     {
         if (_commonsSite == null)
