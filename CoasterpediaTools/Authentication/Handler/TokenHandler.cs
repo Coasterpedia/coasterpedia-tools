@@ -21,8 +21,16 @@ public class TokenHandler
         var sub = GetSub(principal);
         if (sub is null) return new TokenResult(false);
 
-        return await _cache.GetOrCreateAsync<TokenResult>(TokenKey(sub), async cancel => await RefreshToken(sub, cancel), TokenOptions,
-            cancellationToken: cancellationToken);
+        try
+        {
+            return await _cache.GetOrCreateAsync<TokenResult>(TokenKey(sub), async cancel => await RefreshToken(sub, cancel), TokenOptions,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await RemoveToken(sub, cancellationToken);
+            return new TokenResult(false);
+        }
     }
 
     public async Task SetToken(ClaimsPrincipal principal, UserToken token, CancellationToken cancellationToken = default)
@@ -54,9 +62,13 @@ public class TokenHandler
         try
         {
             var result = await _refreshTokenClient.RefreshTokenAsync(new RefreshTokenRequest(refreshToken.Token.RefreshToken), cancellationToken);
-            await _cache.SetAsync(RefreshKey(sub), new TokenResult(true, result), RefreshOptions, cancellationToken: cancellationToken);
-
-            return new TokenResult(true, result);
+            if (result.IsSuccessfulWithContent)
+            {
+                await _cache.SetAsync(RefreshKey(sub), new TokenResult(true, result.Content), RefreshOptions, cancellationToken: cancellationToken);
+                return new TokenResult(true, result.Content);
+            }
+            await RemoveToken(sub, cancellationToken);
+            return new TokenResult(false);
         }
         catch (ApiException e) when (e.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.NotFound)
         {
