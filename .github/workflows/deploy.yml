@@ -78,14 +78,14 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.DOCKER_SSH_KNOWN_HOSTS }}
+          key: ${{ secrets.DOCKER_SSH_2_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.DOCKER_SSH_2_KNOWN_HOSTS }}
 
       - name: Deploy to server
         run: >
-               ssh ${{ secrets.DOCKER_HOST }} '
+               ssh ${{ secrets.DOCKER_HOST_2 }} '
                export API_IMAGE="${{needs.dotnet_build.outputs.digest}}" &&
-               export DEFAULT_CONNECTION_STRING="${{secrets.DEFAULT_CONNECTION_STRING}}" &&
+               export DEFAULT_CONNECTION_STRING="${{secrets.DEFAULT_CONNECTION_STRING_2}}" &&
                export OAUTH_CLIENT_ID="${{secrets.OAUTH_CLIENT_ID}}" &&
                export OAUTH_CLIENT_SECRET="${{secrets.OAUTH_CLIENT_SECRET}}" &&
                export COMMONS_ACCESS_TOKEN="${{secrets.COMMONS_ACCESS_TOKEN}}" &&
